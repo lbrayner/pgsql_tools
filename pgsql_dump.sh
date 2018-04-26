@@ -2,8 +2,11 @@
 
 # set -x
 
+script_name="$(basename "${0}")"
+
 print_usage() {
-	printf '\n%s\n' "${script_name} [-h] [-d FOLDER] [-c CLASSIFIER] [-p TEMPDIR] PG_DUMP_ARGS..."
+	printf '\n%s\n' "${script_name} [-h] [-d FOLDER] [-c CLASSIFIER] [-p TEMPDIR] \
+-- PG_DUMP_ARGS..."
 }
 
 
