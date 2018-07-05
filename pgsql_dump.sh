@@ -5,8 +5,8 @@
 script_name="$(basename "${0}")"
 
 print_usage() {
-	printf '\n%s\n' "${script_name} [-h] [-d FOLDER] [-c CLASSIFIER] [-p TEMPDIR] \
--- PG_DUMP_ARGS..."
+	printf '\n%s\n' "${script_name} [-h] [-d FOLDER] [-c CLASSIFIER] [-p TEMPDIR]\
+ [-- ARGS...]"
 }
 
 
@@ -39,6 +39,7 @@ fi
 classifier=""
 destination="."
 tmpdir="/tmp"
+prefix="pgsql_dump"
 
 while getopts ":hc:d:p:" opt
 do
@@ -70,6 +71,6 @@ then
     exit 1
 fi
 
-name="pgsql_dump${classifier}$(generate_timestamp).sql"
+name="${prefix}${classifier}$(generate_timestamp).sql"
 
 dump_pack "${name}" "${@}"
