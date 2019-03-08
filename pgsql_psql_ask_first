@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+print_usage() {
+	printf '\n%s\n' "$(basename "${0}") PSQL_ARGS..."
+}
+
+if [[ ${#} -eq 0 ]]
+then
+    print_usage 1>&2
+    exit 1
+fi
+
+echo -n "Are you sure? [y/N] "
+read answer
+echo
+
+if [[ -z "${answer}" ]]
+then
+    answer="no"
+fi
+
+case ${answer} in
+    y|Y|yes|YES)
+        psql "${@}"
+        exit 0
+        ;;
+    n|N|no|NO)
+        ;;
+    *)
+        echo "Invalid answer." 1>&2
+        exit 1
+        ;;
+esac
+
+echo "No? Ok, bye."
