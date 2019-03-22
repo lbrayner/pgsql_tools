@@ -1,0 +1,62 @@
+#!/bin/bash
+
+set -x
+
+print_usage() {
+	printf '\n%s\n' "$(basename $0) -s SCHEMA FILE"
+}
+
+schema=""
+while getopts ":s:" opt
+do
+    case ${opt} in
+        s)
+            schema="${OPTARG}"
+            ;;
+        h)
+            print_usage
+            exit 0
+            ;;
+        \?)
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+if [ -z "${schema}" ]
+then
+	print_usage
+	exit 1
+fi
+
+node="${1}"
+
+shift 1
+
+if [ "${1}" = "--" ]
+then
+    shift 1
+fi
+
+pg_copy_csv(){
+    schema="${1}"
+	tablename="$(basename --suffix=.txt "${2}")"
+    file="${2}"
+    shift 2
+	psql "${@}" -c"copy ${schema}.${tablename} from stdin with null 'NULL';" < "${file}"
+}
+
+if [ -f "${node}" ]
+then
+    pg_copy_csv "${schema}" "${node}" "${@}"
+    exit 0
+fi
+
+if [ -d "${node}" ]
+then
+    while read p
+    do
+        pg_copy_csv "${schema}" "${p}" "${@}"
+    done < <( find "${node}" -mindepth 1 -maxdepth 1 ! -path ./.\* -type f)
+    exit 0
+fi
