@@ -31,6 +31,11 @@ fi
 
 node="${1}"
 
+if [[ ! -e "${node}"  ]]
+then
+    printf 'Node does not exist: %s.\n' "${node}" 1>&2
+fi
+
 shift 1
 
 if [[ "${1}" = "--" ]]
@@ -44,6 +49,7 @@ pg_copy_csv(){
     name_with_extension="${file##*/}"
     tablename="${name_with_extension%.csv}"
     shift 2
+    printf 'Copying %s.\n' "${tablename}"
 	psql "${@}" -c"copy ${schema}.${tablename} from stdin with null 'NULL';" < "${file}"
 }
 
