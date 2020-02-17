@@ -3,7 +3,7 @@
 # set -x
 
 print_usage() {
-	printf '\n%s\n' "$(basename $0) -s SCHEMA FILE [-- PG_ARGS]"
+	printf '\n%s\n' "$(basename $0) -s SCHEMA NODE [-- PG_ARGS]"
 }
 
 schema=""
