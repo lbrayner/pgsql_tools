@@ -5,41 +5,16 @@
 script_name="$(basename "${0}")"
 
 print_usage() {
-	printf '\n%s\n' "${script_name} [-h] [-d FOLDER] [-c CLASSIFIER] [-p TEMPDIR]\
+	printf '\n%s\n' "${script_name} [-h] [-d FOLDER] [-p TEMPDIR] -c CLASSIFIER\
  [-- ARGS...]"
 }
-
 
 generate_timestamp(){
     date +'%Y%m%d_%H%M_%N'
 }
 
-dump_pack(){
-
-    name="${1}"
-    shift 1
-
-    dirname_dump_file="$(mktemp -d -p "${tmpdir}")"
-    dump_file="${dirname_dump_file}/${name}"
-    basename_dump_file="${name}"
-    target_zip_file="${destination}/${name}.zip"
-    pg_dump "${@}" -f "${dump_file}"
-    cd "${dirname_dump_file}"
-    zip "${target_zip_file}" "${basename_dump_file}"
-    cd -
-    rm -rf "${dirname_dump_file}"
-}
-
-if [ ! ${#} -gt 0 ]
-then
-	print_usage
-	exit 1
-fi
-
-classifier=""
 destination="."
-tmpdir="/tmp"
-prefix="pgsql_dump"
+tmp="/tmp"
 
 while getopts ":hc:d:p:" opt
 do
@@ -51,7 +26,7 @@ do
             destination="${OPTARG}"
             ;;
         p)
-            tmpdir="${OPTARG}"
+            tmp="${OPTARG}"
             ;;
         h)
             print_usage
@@ -63,14 +38,30 @@ do
 done
 shift $((OPTIND - 1))
 
+if [ -z "${classifier}" ]
+then
+    print_usage 1>&2
+    exit 1
+fi
+
 destination="$(readlink -f "${destination}")"
 
 if [ ! -d "${destination}" ]
 then
-    printf '%s%s%s not a folder.\n' \' "${destination}" \'
+    echo "'${destination}' not a folder." 1>&2
     exit 1
 fi
 
-name="${prefix}${classifier}$(generate_timestamp).sql"
+dump_name="pgsql_dump${classifier}$(generate_timestamp).sql"
 
-dump_pack "${name}" "${@}"
+dump_tmpdir="$(mktemp -d -p "${tmp}")"
+dump="${dump_tmpdir}/${dump_name}"
+pg_dump "${@}" -f "${dump}"
+previous_dir="${PWD}"
+cd "${dump_tmpdir}"
+zip="${destination}/${dump_name}.zip"
+zip "${zip}" "${dump_name}"
+cd "${previous_dir}"
+rm -rf "${dump_tmpdir}"
+
+echo "\n${zip}"
