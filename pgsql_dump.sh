@@ -2,11 +2,9 @@
 
 # set -x
 
-script_name="$(basename "${0}")"
-
 print_usage() {
-	echo -e "\n${script_name} [-h] [-d FOLDER] [-p TEMPDIR] -c CLASSIFIER\
- [-- ARGS...]"
+	printf "\n$(basename "${0}") [-h] [-d FOLDER] [-p TEMPDIR] -c CLASSIFIER\
+ [-- ARGS...]\n"
 }
 
 generate_timestamp(){
