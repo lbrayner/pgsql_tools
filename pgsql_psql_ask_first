@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 print_usage() {
-	printf '\n%s\n' "$(basename "${0}") PSQL_ARGS..."
+	echo -e "\n$(basename "${0}") PSQL_ARGS..."
 }
 
 if [[ ${#} -eq 0 ]]

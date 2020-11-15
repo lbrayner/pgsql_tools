@@ -1,13 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # set -x
 
 print_usage() {
-	printf '\n%s\n' "$(basename $0) -s SCHEMA NODE [-- PG_ARGS]"
+	echo -e "\n$(basename $0) -s SCHEMA NODE [-- PG_ARGS]"
 }
 
 schema=""
-while getopts ":s:" opt
+while getopts ":hs:" opt
 do
     case ${opt} in
         s)
@@ -25,7 +25,7 @@ shift $((OPTIND - 1))
 
 if [[ -z "${schema}" ]]
 then
-	print_usage
+	print_usage 1>&2
 	exit 1
 fi
 
@@ -33,7 +33,8 @@ node="${1}"
 
 if [[ ! -e "${node}"  ]]
 then
-    printf 'Node does not exist: %s.\n' "${node}" 1>&2
+    echo "Node does not exist: ${node}." 1>&2
+    exit 1
 fi
 
 shift 1
@@ -49,23 +50,19 @@ pg_copy_csv(){
     name_with_extension="${file##*/}"
     tablename="${name_with_extension%.csv}"
     shift 2
-    printf 'Copying %s.\n' "${tablename}"
+    echo -e "Copying ${tablename}."
 	psql "${@}" -c"copy ${schema}.${tablename} from stdin with null 'NULL';" < "${file}"
 }
 
 if [ -f "${node}" ]
 then
     pg_copy_csv "${schema}" "${node}" "${@}"
-    exit 0
+    exit
 fi
 
-if [ -d "${node}" ]
-then
-    while read p
-    do
-        pg_copy_csv "${schema}" "${p}" "${@}"
-    done < <( find "${node}" -mindepth 1 -maxdepth 1 \
-        ! -path \*/.\* -iname \*.csv -type f \
-        ! -size 0)
-    exit 0
-fi
+while read p
+do
+    pg_copy_csv "${schema}" "${p}" "${@}"
+done < <( find "${node}" -mindepth 1 -maxdepth 1 \
+    ! -path \*/.\* -iname \*.csv -type f \
+    ! -size 0)

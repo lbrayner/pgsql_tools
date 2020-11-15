@@ -5,7 +5,7 @@
 script_name="$(basename "${0}")"
 
 print_usage() {
-	printf '\n%s\n' "${script_name} [-h] [-d FOLDER] [-p TEMPDIR] -c CLASSIFIER\
+	echo -e "\n${script_name} [-h] [-d FOLDER] [-p TEMPDIR] -c CLASSIFIER\
  [-- ARGS...]"
 }
 
