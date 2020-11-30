@@ -62,4 +62,4 @@ zip "${zip}" "${dump_name}"
 cd "${previous_dir}"
 rm -rf "${dump_tmpdir}"
 
-echo "\n${zip}"
+printf "\n${zip}\n"
